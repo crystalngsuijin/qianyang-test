@@ -1,0 +1,302 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>你的生活中了几毒？｜千阳有虎，共你镇毒</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Microsoft YaHei", sans-serif;
+  background: #fff6e9;
+  color: #49372e;
+}
+button { font: inherit; cursor: pointer; }
+.page {
+  min-height: 100vh;
+  padding: 35px 18px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.page.active { display: flex; }
+.panel {
+  width: 100%;
+  max-width: 650px;
+  background: #fff;
+  border: 3px solid #f2d7b8;
+  border-radius: 28px;
+  padding: 35px 28px;
+  text-align: center;
+  box-shadow: 0 8px 0 #ead4b9;
+}
+.tag {
+  display: inline-block;
+  background: #fff0d9;
+  color: #a65e32;
+  border-radius: 30px;
+  padding: 8px 16px;
+  font-size: 13px;
+}
+h1 { font-size: clamp(30px, 7vw, 48px); margin: 20px 0 10px; }
+h2 { font-size: 25px; }
+.subtitle { color: #8b786a; line-height: 1.8; }
+.tiger { font-size: 85px; margin: 15px 0; }
+.main-btn {
+  border: none;
+  background: #e9824e;
+  color: white;
+  padding: 15px 38px;
+  border-radius: 30px;
+  font-weight: bold;
+  margin-top: 20px;
+  box-shadow: 0 5px 0 #c8643b;
+}
+.main-btn:active { transform: translateY(3px); box-shadow: none; }
+.progress {
+  height: 10px;
+  background: #f3e7d8;
+  border-radius: 20px;
+  margin: 20px 0 28px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  width: 0;
+  background: #e9824e;
+  transition: width .3s;
+}
+.question-number { color: #b17a50; font-weight: bold; }
+.question { font-size: 23px; line-height: 1.6; margin: 18px 0 25px; }
+.options { display: grid; gap: 12px; text-align: left; }
+.option {
+  border: 2px solid #f0dfce;
+  background: #fffaf4;
+  padding: 16px;
+  border-radius: 15px;
+  color: #574438;
+  line-height: 1.5;
+}
+.option:hover, .option.selected {
+  border-color: #e9824e;
+  background: #fff0e4;
+}
+.animal { font-size: 55px; margin: 12px; }
+.result-score { font-size: 48px; color: #df7846; font-weight: bold; }
+.result-type { color: #b25e35; font-size: 28px; font-weight: bold; }
+.result-box {
+  background: #fff6e9;
+  padding: 18px;
+  border-radius: 18px;
+  margin: 18px 0;
+  line-height: 1.8;
+}
+.small { font-size: 13px; color: #998779; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<section class="page active" id="home">
+  <div class="panel">
+    <span class="tag">千阳小虎队 · 趣味测试</span>
+    <div class="tiger">🐯</div>
+    <h1>你的生活中了几毒？</h1>
+    <h2>千阳有虎，共你镇毒</h2>
+    <p class="subtitle">
+      生活中总有一些小烦恼？<br>
+      是什么正在偷偷消耗你的能量？<br>
+      让千阳小虎队陪你找出答案！
+    </p>
+    <button class="main-btn" onclick="startTest()">开始测试</button>
+    <p class="small">共 5 道题 · 约 1 分钟 · 趣味测试</p>
+  </div>
+</section>
+
+<section class="page" id="quiz">
+  <div class="panel">
+    <span class="tag">千阳小虎队 · 生活状态检测</span>
+    <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="question-number" id="questionNumber"></div>
+    <div class="animal" id="animal"></div>
+    <div class="question" id="question"></div>
+    <div class="options" id="options"></div>
+    <p class="small">选择最符合你真实状态的答案</p>
+  </div>
+</section>
+
+<section class="page" id="result">
+  <div class="panel">
+    <span class="tag">千阳小虎队 · 测试结果</span>
+    <div class="tiger">🐯</div>
+    <h1>你的生活中毒报告</h1>
+    <div class="result-score" id="score"></div>
+    <div class="result-type" id="resultType"></div>
+    <div class="result-box" id="resultDescription"></div>
+    <h2>你的主要烦恼</h2>
+    <div class="result-box" id="mainWorry"></div>
+    <h2>小虎队送你的祝福</h2>
+    <div class="result-box" id="blessing"></div>
+    <button class="main-btn" onclick="copyResult()">复制测试结果</button>
+    <br>
+    <button class="main-btn" onclick="restart()" style="background:#8b9c6b;box-shadow:0 5px 0 #68794e">重新测试</button>
+    <p class="small">本测试仅供趣味互动，不代表专业心理评估。</p>
+  </div>
+</section>
+
+<script>
+const questions = [
+  {
+    animal: "🐍",
+    name: "蛇 · 缠绕之毒",
+    question: "当很多事情同时找上你，别人又不断发消息、找你帮忙时，你会？",
+    options: [
+      "能够安排好自己的事情，也能从容应对",
+      "有点烦，但还是会尽量处理",
+      "不太会拒绝别人，事情越积越多"
+    ]
+  },
+  {
+    animal: "🦂",
+    name: "蝎子 · 刺痛之毒",
+    question: "当你被别人批评、比较，或者听到负面评价时，你会？",
+    options: [
+      "不会太在意，继续做好自己的事情",
+      "会有一点不舒服，但很快调整过来",
+      "反复想起这些话，甚至开始怀疑自己"
+    ]
+  },
+  {
+    animal: "🐛",
+    name: "蜈蚣 · 忙乱之毒",
+    question: "当学习、工作、社团和生活中的事情一起出现时，你会？",
+    options: [
+      "按照轻重缓急安排，逐件完成",
+      "虽然很忙，但基本还能应付",
+      "不知道应该先做什么，感觉手忙脚乱"
+    ]
+  },
+  {
+    animal: "🦎",
+    name: "壁虎 · 不舍之毒",
+    question: "当一件事情或一段关系持续消耗你的精力时，你会？",
+    options: [
+      "及时调整，必要时选择放下",
+      "会犹豫一段时间，不太容易决定",
+      "明知道不适合，却还是舍不得放手"
+    ]
+  },
+  {
+    animal: "🐸",
+    name: "蟾蜍 · 钱包之毒",
+    question: "当房租、账单和日常生活开销接踵而来时，你会？",
+    options: [
+      "有自己的预算，基本能够应对",
+      "需要控制一下开支，偶尔有压力",
+      "总觉得钱不够用，月底特别有压力"
+    ]
+  }
+];
+
+let current = 0;
+let answers = [];
+
+function showPage(id) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+function startTest() {
+  current = 0;
+  answers = [];
+  showPage("quiz");
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = questions[current];
+  document.getElementById("questionNumber").textContent =
+    `QUESTION ${current + 1} / 5 · ${q.name}`;
+  document.getElementById("animal").textContent = q.animal;
+  document.getElementById("question").textContent = q.question;
+  document.getElementById("progressBar").style.width =
+    `${(current / 5) * 100}%`;
+
+  const options = document.getElementById("options");
+  options.innerHTML = "";
+
+  q.options.forEach((option, index) => {
+    const button = document.createElement("button");
+    button.className = "option";
+    button.textContent = `${["A", "B", "C"][index]} · ${option}`;
+    button.onclick = () => {
+      answers[current] = index;
+      current++;
+      if (current < questions.length) renderQuestion();
+      else showResult();
+    };
+    options.appendChild(button);
+  });
+}
+
+function showResult() {
+  const total = answers.reduce((sum, value) => sum + value, 0);
+  document.getElementById("progressBar").style.width = "100%";
+  document.getElementById("score").textContent = `${total} / 10`;
+
+  let type, description, blessing;
+  if (total <= 2) {
+    type = "百毒不侵型";
+    description = "你的生活节奏比较稳定，面对日常烦恼也有自己的应对方式。";
+    blessing = "保持自己的节奏，继续勇敢向前！";
+  } else if (total <= 6) {
+    type = "轻度中毒型";
+    description = "最近可能有一些烦恼正在消耗你，不过别担心，慢慢调整就好。";
+    blessing = "烦恼来了也别怕，小虎陪你一起面对！";
+  } else {
+    type = "五毒缠身型";
+    description = "最近似乎有不少事情压在心上，是时候给自己一点休息空间了。";
+    blessing = "别着急，千阳小虎队全员出动，陪你一起镇烦恼！";
+  }
+
+  const maxScore = Math.max(...answers);
+  const mainIndexes = answers
+    .map((value, index) => value === maxScore ? index : -1)
+    .filter(index => index !== -1);
+
+  const worries = mainIndexes.map(index =>
+    `${questions[index].animal} ${questions[index].name}`
+  ).join("<br>");
+
+  document.getElementById("resultType").textContent = type;
+  document.getElementById("resultDescription").textContent = description;
+  document.getElementById("mainWorry").innerHTML =
+    `${worries}<br><span class="small">以上为你得分最高的烦恼类型</span>`;
+  document.getElementById("blessing").textContent = blessing;
+  showPage("result");
+}
+
+function copyResult() {
+  const score = document.getElementById("score").textContent;
+  const type = document.getElementById("resultType").textContent;
+  const text = `我在「你的生活中了几毒？」测试中获得 ${score} 分，属于${type}！千阳有虎，共你镇毒！你也来测测吧！`;
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => alert("测试结果已复制！"));
+  } else {
+    const area = document.createElement("textarea");
+    area.value = text;
+    document.body.appendChild(area);
+    area.select();
+    document.execCommand("copy");
+    area.remove();
+    alert("测试结果已复制！");
+  }
+}
+
+function restart() {
+  startTest();
+}
+</script>
+</body>
+</html>
